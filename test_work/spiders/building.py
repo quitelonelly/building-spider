@@ -77,7 +77,7 @@ class BuildingSpider(scrapy.Spider):
         
         # Ожидаем появления элементов на странице
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'h1.Header__Name-sc-eng632-3.fSjDTR'))
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'span.CharacteristicsBlock__RowSpan-sc-1fyyfia-4.eCBXEE'))
         )
         
         # Получаем HTML-код страницы
@@ -86,18 +86,12 @@ class BuildingSpider(scrapy.Spider):
         
         # Парсинг информации на странице объекта
         title = sel.css('h1.Header__Name-sc-eng632-3.fSjDTR::text').get()
-        address = sel.xpath('//p[contains(@class, "Header__Address-sc-eng632-8")]/text()').get()
-        if address:
-            address = address.strip()
-        else:
-            address = "Нет данных"
+        
+        address_link = sel.css('a.Header__Message-sc-eng632-6.ftoKlK::attr(href)').get()
+        address = address_link.split('&search=')[-1]
+        address = address.replace('%20', ' ')
 
-
-        building_id = response.css('p.ButtonsRow__ObjectId-sc-1a7tla9-7.dXNRhw::text').get()
-        if building_id:
-            building_id = building_id.split('&nbsp;')[-1]
-        else:
-            building_id = "Нет данных"
+        building_id = response.url.split('/')[-1]
             
         commissioning = response.css('div.Row-sc-13pfgqd-0.dJkQFS div.Row__Value-sc-13pfgqd-2.dySlPJ::text').get()
         if commissioning:
@@ -107,16 +101,9 @@ class BuildingSpider(scrapy.Spider):
             
         developer = sel.css('a.Link__LinkContainer-sc-1u7ca6h-0.hYekpU::text').get()
         
-        group = response.css('div.Row-sc-13pfgqd-0.dJkQFS div.Row__Value-sc-13pfgqd-2.dySlPJ a.Link__LinkContainer-sc-1u7ca6h-0.hYekpU::text').get()
-        if not group:
-            group = "Нет данных"
+        group = response.css('a.Link__LinkContainer-sc-1u7ca6h-0.hYekpU::text').get()
 
-
-        date = response.css('div.Row__Value-sc-13pfgqd-2.dySlPJ').get()
-        if date:
-            date = date.strip()
-        else:
-            date = "Нет данных"
+        date = response.css('div.Row__Value-sc-13pfgqd-2.dySlPJ::text').get()
             
         key = response.css('div.Row__Value-sc-13pfgqd-2.dySlPJ').get()
         
